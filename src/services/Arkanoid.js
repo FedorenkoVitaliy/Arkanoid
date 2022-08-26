@@ -11,6 +11,16 @@ class FortuneWheelService {
             ball: null,
             block: null,
             platform: null,
+        };
+        this.platform = {
+            x: 280,
+            y: 300
+        }
+        this.ball = {
+            x: 320,
+            y: 280,
+            width: 20,
+            height: 20
         }
     }
 
@@ -39,14 +49,12 @@ class FortuneWheelService {
         window.addEventListener('load', () => {
             window.requestAnimationFrame(() => {
                 this.ctx.drawImage(this.sprite.background, 0, 0);
-                this.ctx.drawImage(this.sprite.ball, 0, 0);
+                this.ctx.drawImage(this.sprite.ball, 0, 0, this.ball.width, this.ball.height, this.ball.x, this.ball.y, this.ball.width, this.ball.height);
                 this.ctx.drawImage(this.sprite.block, 0, 0);
-                this.ctx.drawImage(this.sprite.platform, 0, 0);
+                this.ctx.drawImage(this.sprite.platform, this.platform.x, this.platform.y);
             });
         })
     }
-
-
 
     start = (canvasId) => {
         this.init(canvasId);
