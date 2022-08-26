@@ -61,7 +61,6 @@ class FortuneWheelService {
     }
 
     run = () => {
-        console.log(this.blocks);
         window.addEventListener('load', () => {
             window.requestAnimationFrame(() => {
                 this.ctx.drawImage(this.sprite.background, 0, 0);
