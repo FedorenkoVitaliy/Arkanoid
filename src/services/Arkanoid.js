@@ -23,12 +23,34 @@ class FortuneWheelService {
         };
         this.platform = {
             x: 280,
-            y: 300
+            y: 300,
+            velocity: 6,
+            dx: 0,
         };
+    }
+
+    setEvents = () => {
+        window.addEventListener("keydown", (e) => {
+            if(e.keyCode === 37){
+                this.platform.dx = -this.platform.velocity
+            }
+
+            if(e.keyCode === 39){
+                this.platform.dx = this.platform.velocity
+            }
+            //this.run();
+        })
+        window.addEventListener("keyup", (e) => {
+            if (e.keyCode === 37 || e.keyCode === 39){
+                this.platform.dx = 0
+            }
+            //this.run();
+        })
     }
 
     init = (canvasId) => {
         this.ctx = document.getElementById(canvasId).getContext('2d');
+        this.setEvents();
     }
 
     imageLoader = (name, img) => {
@@ -60,25 +82,37 @@ class FortuneWheelService {
         }
     }
 
-    run = () => {
-        window.addEventListener('load', () => {
-            window.requestAnimationFrame(() => {
-                this.ctx.drawImage(this.sprite.background, 0, 0);
-                this.ctx.drawImage(this.sprite.ball, 0, 0, this.ball.width, this.ball.height, this.ball.x, this.ball.y, this.ball.width, this.ball.height);
-                this.ctx.drawImage(this.sprite.platform, this.platform.x, this.platform.y);
-                this.blocks.forEach((block) => {
-                    this.ctx.drawImage(this.sprite.block, block.x, block.y);
-                })
+    update = () => {
+        if(this.platform.dx){
+            this.platform.x += this.platform.dx
+        }
+    }
 
-            });
+    run = () => {
+        window.requestAnimationFrame(() => {
+            this.update();
+            this.render();
+            this.run(); // I think not good solution
         })
+    }
+
+    render = () => {
+        this.ctx.drawImage(this.sprite.background, 0, 0);
+        this.ctx.drawImage(this.sprite.ball, 0, 0, this.ball.width, this.ball.height, this.ball.x, this.ball.y, this.ball.width, this.ball.height);
+        this.ctx.drawImage(this.sprite.platform, this.platform.x, this.platform.y);
+        this.blocks.forEach((block) => {
+            this.ctx.drawImage(this.sprite.block, block.x, block.y);
+        })
+        console.log('render')
     }
 
     start = (canvasId) => {
         this.init(canvasId);
         this.preload(() => {
             this.create();
-            this.run();
+            window.addEventListener('load', () => {
+                this.run();
+            });
         });
     }
 }
