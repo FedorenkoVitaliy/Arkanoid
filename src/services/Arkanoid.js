@@ -10,6 +10,10 @@ const KEYS = {
     ESC: 27,
 }
 
+export const randomNumber = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
 class Ball {
     constructor() {
         this.x = 320;
@@ -17,16 +21,21 @@ class Ball {
         this.width = 20;
         this.height = 20;
         this.velocity = 3;
+        this.dx = 0;
         this.dy = 0;
     }
 
     start = () => {
-        this.dy = -this.velocity
+        this.dy = -this.velocity;
+        this.dx = randomNumber(-this.velocity, this.velocity);
     }
 
     move = () => {
         if(this.dy){
             this.y += this.dy;
+        }
+        if(this.dx){
+            this.x += this.dx;
         }
     }
  }
@@ -79,6 +88,8 @@ class FortuneWheelService {
         this.blocks = [];
         this.rows = 4;
         this.cols = 8;
+        this.width = 640;
+        this.height = 360;
         this.ball = new Ball();
         this.platform = new Platform(this.ball);
     }
@@ -159,6 +170,8 @@ class FortuneWheelService {
     }
 
     render = () => {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+
         this.ctx.drawImage(this.sprite.background, 0, 0);
         this.ctx.drawImage(this.sprite.ball, 0, 0, this.ball.width, this.ball.height, this.ball.x, this.ball.y, this.ball.width, this.ball.height);
         this.ctx.drawImage(this.sprite.platform, this.platform.x, this.platform.y);
