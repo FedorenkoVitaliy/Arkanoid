@@ -6,6 +6,8 @@ import platform from '../img/platform.png'
 const KEYS = {
     LEFT: 37,
     RIGHT: 39,
+    SPACE: 32,
+    ESC: 27,
 }
 
 class Ball {
@@ -14,15 +16,28 @@ class Ball {
         this.y = 280;
         this.width = 20;
         this.height = 20;
+        this.velocity = 3;
+        this.dy = 0;
     }
-}
+
+    start = () => {
+        this.dy = -this.velocity
+    }
+
+    move = () => {
+        if(this.dy){
+            this.y += this.dy;
+        }
+    }
+ }
 
 class Platform {
-    constructor() {
+    constructor(ball) {
         this.x = 280;
         this.y = 300;
         this.velocity = 6;
         this.dx = 0;
+        this.ball = ball;
     }
 
     start = (keyCode) => {
@@ -36,9 +51,18 @@ class Platform {
 
     stop = () => this.dx = 0;
 
+    fire = () => {
+        this.ball.start();
+        this.ball = null;
+    }
+
     move = () => {
         if(this.dx){
-            this.x += this.dx
+            this.x += this.dx;
+
+            if(this.ball){
+                this.ball.x += this.dx;
+            }
         }
     }
 }
@@ -56,20 +80,35 @@ class FortuneWheelService {
         this.rows = 4;
         this.cols = 8;
         this.ball = new Ball();
-        this.platform = new Platform();
+        this.platform = new Platform(this.ball);
     }
 
     setEvents = () => {
         window.addEventListener("keydown", (e) => {
-            if(e.keyCode === KEYS.LEFT || e.keyCode === KEYS.RIGHT){
+            if(e.keyCode === KEYS.SPACE){
+                this.platform.fire();
+            }
+            if(e.keyCode === KEYS.ESC){
+                this.reset();
+            }
+            else if(e.keyCode === KEYS.LEFT || e.keyCode === KEYS.RIGHT){
                 this.platform.start(e.keyCode);
             }
+
         })
         window.addEventListener("keyup", (e) => {
             if (e.keyCode === KEYS.LEFT || e.keyCode === KEYS.RIGHT) {
                 this.platform.stop();
             }
         })
+    }
+
+    reset = () => {
+        this.ball.dy = 0;
+        this.ball.y = 280;
+        this.ball.x = 320;
+        this.platform.dx = 0;
+        this.platform.x = 280;
     }
 
     init = (canvasId) => {
@@ -108,9 +147,7 @@ class FortuneWheelService {
 
     update = () => {
         this.platform.move();
-        if(this.platform.dx){
-            this.ball.x += this.platform.dx
-        }
+        this.ball.move();
     }
 
     run = () => {
