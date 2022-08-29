@@ -4,10 +4,15 @@ import Arkanoid from '../../services/Arkanoid';
 import './App.css';
 
 
-function App() {
+const App = () => {
 
     useEffect(() => {
-        Arkanoid.start("Arkanoid");
+        let ignore = false;
+
+        if (!ignore) {
+            Arkanoid.start("Arkanoid");
+        }
+        return () => { ignore = true }
     }, [])
 
     return (
