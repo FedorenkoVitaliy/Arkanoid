@@ -30,6 +30,22 @@ class Ball {
         this.dx = randomNumber(-this.velocity, this.velocity);
     }
 
+    collide = (element) => {
+        let nextX = this.x + this.dx;
+        let nextY = this.y + this.dy;
+
+        return (
+            nextX + this.width > element.x &&
+            nextX < element.x + element.width &&
+            nextY + this.height > element.y &&
+            nextY < element.y + element.height
+        );
+    }
+
+    bumpBlock = () => {
+        this.dy *= -1;
+    }
+
     move = () => {
         if(this.dy){
             this.y += this.dy;
@@ -151,6 +167,8 @@ class FortuneWheelService {
                 this.blocks.push({
                     x: 64 * col + 65,
                     y: 24 * row + 35,
+                    width: 40,
+                    height: 20,
                 })
             }
         }
@@ -159,6 +177,12 @@ class FortuneWheelService {
     update = () => {
         this.platform.move();
         this.ball.move();
+
+        this.blocks.forEach(block => {
+            if(this.ball.collide(block)){
+                this.ball.bumpBlock()
+            }
+        })
     }
 
     run = () => {
