@@ -3,6 +3,46 @@ import ball from '../img/ball.png'
 import block from '../img/block.png'
 import platform from '../img/platform.png'
 
+const KEYS = {
+    LEFT: 37,
+    RIGHT: 39,
+}
+
+class Ball {
+    constructor() {
+        this.x = 320;
+        this.y = 280;
+        this.width = 20;
+        this.height = 20;
+    }
+}
+
+class Platform {
+    constructor() {
+        this.x = 280;
+        this.y = 300;
+        this.velocity = 6;
+        this.dx = 0;
+    }
+
+    start = (keyCode) => {
+        if(keyCode === KEYS.LEFT){
+            this.dx = -this.velocity
+        }
+        if(keyCode === KEYS.RIGHT){
+            this.dx = this.velocity
+        }
+    }
+
+    stop = () => this.dx = 0;
+
+    move = () => {
+        if(this.dx){
+            this.x += this.dx
+        }
+    }
+}
+
 class FortuneWheelService {
     constructor() {
         this.ctx = null;
@@ -15,36 +55,20 @@ class FortuneWheelService {
         this.blocks = [];
         this.rows = 4;
         this.cols = 8;
-        this.ball = {
-            x: 320,
-            y: 280,
-            width: 20,
-            height: 20
-        };
-        this.platform = {
-            x: 280,
-            y: 300,
-            velocity: 6,
-            dx: 0,
-        };
+        this.ball = new Ball();
+        this.platform = new Platform();
     }
 
     setEvents = () => {
         window.addEventListener("keydown", (e) => {
-            if(e.keyCode === 37){
-                this.platform.dx = -this.platform.velocity
+            if(e.keyCode === KEYS.LEFT || e.keyCode === KEYS.RIGHT){
+                this.platform.start(e.keyCode);
             }
-
-            if(e.keyCode === 39){
-                this.platform.dx = this.platform.velocity
-            }
-            //this.run();
         })
         window.addEventListener("keyup", (e) => {
-            if (e.keyCode === 37 || e.keyCode === 39){
-                this.platform.dx = 0
+            if (e.keyCode === KEYS.LEFT || e.keyCode === KEYS.RIGHT) {
+                this.platform.stop();
             }
-            //this.run();
         })
     }
 
@@ -83,8 +107,9 @@ class FortuneWheelService {
     }
 
     update = () => {
+        this.platform.move();
         if(this.platform.dx){
-            this.platform.x += this.platform.dx
+            this.ball.x += this.platform.dx
         }
     }
 
@@ -103,7 +128,6 @@ class FortuneWheelService {
         this.blocks.forEach((block) => {
             this.ctx.drawImage(this.sprite.block, block.x, block.y);
         })
-        console.log('render')
     }
 
     start = (canvasId) => {
