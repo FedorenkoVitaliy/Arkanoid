@@ -42,9 +42,14 @@ class Ball {
         );
     }
 
-    bumpBlock = () => {
-        this.dy *= -1;
+    bumpBlock = (block) => {
+        if(block.active){
+            this.dy *= -1;
+        }
+
+        block.active = false
     }
+
     bumpPlatform = (platform) => {
         let touchX = this.x + this.width / 2;
         this.dy *= -1;
@@ -176,7 +181,7 @@ class FortuneWheelService {
         await callBack();
     }
 
-    create = () => {
+    createBlocks = () => {
         for(let row = 0; row < this.rows; row++ ) {
             for(let col = 0; col < this.cols; col++ ) {
                 this.blocks.push({
@@ -184,6 +189,7 @@ class FortuneWheelService {
                     y: 24 * row + 35,
                     width: 40,
                     height: 20,
+                    active: true
                 })
             }
         }
@@ -192,7 +198,7 @@ class FortuneWheelService {
     collideBlocks = () => {
         this.blocks.forEach(block => {
             if(this.ball.collide(block)){
-                this.ball.bumpBlock()
+                this.ball.bumpBlock(block)
             }
         })
     }
@@ -225,14 +231,16 @@ class FortuneWheelService {
         this.ctx.drawImage(this.sprite.ball, 0, 0, this.ball.width, this.ball.height, this.ball.x, this.ball.y, this.ball.width, this.ball.height);
         this.ctx.drawImage(this.sprite.platform, this.platform.x, this.platform.y);
         this.blocks.forEach((block) => {
-            this.ctx.drawImage(this.sprite.block, block.x, block.y);
+            if(block.active){
+                this.ctx.drawImage(this.sprite.block, block.x, block.y);
+            }
         })
     }
 
     start = (canvasId) => {
         this.init(canvasId);
         this.preload(() => {
-            this.create();
+            this.createBlocks();
             window.addEventListener('load', () => {
                 this.run();
             });
