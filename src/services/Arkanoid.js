@@ -206,9 +206,8 @@ class FortuneWheelService {
     update = () => {
         this.platform.move();
         this.ball.move();
-
-       this.collideBlocks();
-       this.collidePlatform();
+        this.collideBlocks();
+        this.collidePlatform();
     }
 
     run = () => {
