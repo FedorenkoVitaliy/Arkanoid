@@ -1,7 +1,7 @@
 import background from '../img/background.png'
-import ball from '../img/ball.png'
-import block from '../img/block.png'
-import platform from '../img/platform.png'
+import ballImg from '../img/ball.png'
+import blockImg from '../img/block.png'
+import platformImg from '../img/platform.png'
 
 const KEYS = {
     LEFT: 37,
@@ -20,7 +20,7 @@ class Ball {
         this.y = 280;
         this.width = 20;
         this.height = 20;
-        this.velocity = 3;
+        this.velocity = 2;
         this.dx = 0;
         this.dy = 0;
     }
@@ -45,6 +45,11 @@ class Ball {
     bumpBlock = () => {
         this.dy *= -1;
     }
+    bumpPlatform = (platform) => {
+        let touchX = this.x + this.width / 2;
+        this.dy *= -1;
+        this.dx = this.velocity * platform.getTouchOffset(touchX);
+    }
 
     move = () => {
         if(this.dy){
@@ -60,6 +65,8 @@ class Platform {
     constructor(ball) {
         this.x = 280;
         this.y = 300;
+        this.width = 100;
+        this.height = 14;
         this.velocity = 6;
         this.dx = 0;
         this.ball = ball;
@@ -79,6 +86,14 @@ class Platform {
     fire = () => {
         this.ball.start();
         this.ball = null;
+    }
+
+    getTouchOffset = (x) => {
+        let diff = (this.x + this.width) - x;
+        let offset = this.width - diff;
+        let result = 2 * offset / this.width;
+
+        return result - 1;
     }
 
     move = () => {
@@ -154,9 +169,9 @@ class FortuneWheelService {
 
     preload = async (callBack) => {
         await this.imageLoader('background', background);
-        await this.imageLoader('platform', platform);
-        await this.imageLoader('ball', ball);
-        await this.imageLoader('block', block);
+        await this.imageLoader('platform', platformImg);
+        await this.imageLoader('ball', ballImg);
+        await this.imageLoader('block', blockImg);
 
         await callBack();
     }
@@ -174,15 +189,26 @@ class FortuneWheelService {
         }
     }
 
-    update = () => {
-        this.platform.move();
-        this.ball.move();
-
+    collideBlocks = () => {
         this.blocks.forEach(block => {
             if(this.ball.collide(block)){
                 this.ball.bumpBlock()
             }
         })
+    }
+
+    collidePlatform = () => {
+        if(this.ball.collide(this.platform)){
+            this.ball.bumpPlatform(this.platform);
+        }
+    }
+
+    update = () => {
+        this.platform.move();
+        this.ball.move();
+
+       this.collideBlocks();
+       this.collidePlatform();
     }
 
     run = () => {
