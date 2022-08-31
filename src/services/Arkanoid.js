@@ -43,9 +43,7 @@ class Ball {
     }
 
     bumpBlock = (block) => {
-        if(block.active){
-            this.dy *= -1;
-        }
+        this.dy *= -1;
 
         block.active = false
     }
@@ -197,7 +195,7 @@ class FortuneWheelService {
 
     collideBlocks = () => {
         this.blocks.forEach(block => {
-            if(this.ball.collide(block)){
+            if(block.active && this.ball.collide(block)){
                 this.ball.bumpBlock(block)
             }
         })
