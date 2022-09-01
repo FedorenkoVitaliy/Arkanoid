@@ -3,7 +3,8 @@ import ballImg from '../img/ball.png'
 import blockImg from '../img/block.png'
 import platformImg from '../img/platform.png'
 import bumpSong from '../sounds/bump.mp3'
-import slashSong from '../sounds/slash.mp3'
+import winSong from '../sounds/win.wav'
+import overSong from '../sounds/over.wav'
 
 const KEYS = {
     LEFT: 37,
@@ -25,11 +26,22 @@ class Ball {
         this.velocity = 2;
         this.dx = 0;
         this.dy = 0;
+        this.frame = 0;
+    }
+
+    animate = () => {
+        setInterval(() => {
+            ++this.frame;
+            if(this.frame>3) {
+                this.frame = 0;
+            }
+        }, 100)
     }
 
     start = () => {
         this.dy = -this.velocity;
         this.dx = randomNumber(-this.velocity, this.velocity);
+        this.animate();
     }
 
     collide = (element) => {
@@ -44,7 +56,7 @@ class Ball {
         );
     }
 
-    collideWorldBounds = (gameOver) => {
+    collideWorldBounds = (onCollide, gameOver) => {
         const nextX = this.x + this.dx;
         const nextY = this.y + this.dy;
 
@@ -65,19 +77,22 @@ class Ball {
         if (ballPosition.left <= worldPosition.left){
             this.x = worldPosition.left;
             this.dx *= -1;
+            onCollide();
         }
 
         if(ballPosition.right >= worldPosition.right){
             this.x = worldPosition.right - this.width;
             this.dx *= -1;
+            onCollide();
         }
 
-        if (ballPosition.top < worldPosition.top){
+        if (ballPosition.top <= worldPosition.top){
             this.y = worldPosition.top;
             this.dy *= -1;
+            onCollide();
         }
 
-        if (ballPosition.bottom === worldPosition.bottom){
+        if (ballPosition.bottom > worldPosition.bottom){
             gameOver();
         }
     }
@@ -186,7 +201,8 @@ class FortuneWheelService {
         };
         this.sounds = {
             bump: null,
-            slash: null,
+            win: null,
+            over: null,
         }
         this.blocks = [];
         this.rows = 4;
@@ -196,7 +212,7 @@ class FortuneWheelService {
         this.height = 360;
         this.ball = new Ball();
         this.platform = new Platform(this.ball);
-        this.inProgress = false
+        this.inProgress = false;
     }
 
     setEvents = () => {
@@ -260,7 +276,8 @@ class FortuneWheelService {
         await this.imageLoader('ball', ballImg);
         await this.imageLoader('block', blockImg);
         await this.soundLoader('bump', bumpSong);
-        await this.soundLoader('slash', slashSong);
+        await this.soundLoader('win', winSong);
+        await this.soundLoader('over', overSong);
 
         await callBack();
     }
@@ -283,7 +300,7 @@ class FortuneWheelService {
         this.score++;
 
         if(this.score >= this.blocks.length){
-            this.end('Game win');
+            this.end('Game win', 'win');
         }
     }
 
@@ -300,7 +317,7 @@ class FortuneWheelService {
     collidePlatform = () => {
         if(this.ball.collide(this.platform)){
             this.ball.bumpPlatform(this.platform);
-            this.playSong('slash')
+            this.playSong('bump')
         }
     }
 
@@ -309,7 +326,9 @@ class FortuneWheelService {
         this.ball.move();
         this.collideBlocks();
         this.collidePlatform();
-        this.ball.collideWorldBounds(() => this.end('Game over'));
+        this.ball.collideWorldBounds(
+            () => this.playSong('bump'),
+            () => this.end('Game over', 'over'));
         this.platform.collideWorldBounds();
     }
 
@@ -327,7 +346,7 @@ class FortuneWheelService {
         this.ctx.clearRect(0, 0, this.width, this.height);
 
         this.ctx.drawImage(this.sprite.background, 0, 0);
-        this.ctx.drawImage(this.sprite.ball, 0, 0, this.ball.width, this.ball.height, this.ball.x, this.ball.y, this.ball.width, this.ball.height);
+        this.ctx.drawImage(this.sprite.ball, this.ball.frame * this.ball.width, 0, this.ball.width, this.ball.height, this.ball.x, this.ball.y, this.ball.width, this.ball.height);
         this.ctx.drawImage(this.sprite.platform, this.platform.x, this.platform.y);
         this.blocks.forEach((block) => {
             if(block.active){
@@ -347,7 +366,8 @@ class FortuneWheelService {
         });
     }
 
-    end = (message) => {
+    end = (message, sound) => {
+        this.playSong(sound)
         this.inProgress = false;
         alert(message);
         window.location.reload();
