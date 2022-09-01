@@ -2,6 +2,8 @@ import background from '../img/background.png'
 import ballImg from '../img/ball.png'
 import blockImg from '../img/block.png'
 import platformImg from '../img/platform.png'
+import bumpSong from '../sounds/bump.mp3'
+import slashSong from '../sounds/slash.mp3'
 
 const KEYS = {
     LEFT: 37,
@@ -182,6 +184,10 @@ class FortuneWheelService {
             block: null,
             platform: null,
         };
+        this.sounds = {
+            bump: null,
+            slash: null,
+        }
         this.blocks = [];
         this.rows = 4;
         this.cols = 8;
@@ -224,11 +230,31 @@ class FortuneWheelService {
         })
     }
 
+    soundLoader = (name, sound) => {
+        return new Promise((resolve, reject) => {
+            this.sounds[name] = new Audio(sound);
+
+            this.sounds[name].addEventListener(
+                'canplaythrough',
+                () => resolve(this.sounds),
+                { once: true }
+            );
+            this.sounds[name].onerror = reject
+        })
+    }
+
+    playSong = (name) => {
+       this.sounds[name].currentTime = 0;
+       this.sounds[name].play();
+    }
+
     preload = async (callBack) => {
         await this.imageLoader('background', background);
         await this.imageLoader('platform', platformImg);
         await this.imageLoader('ball', ballImg);
         await this.imageLoader('block', blockImg);
+        await this.soundLoader('bump', bumpSong);
+        await this.soundLoader('slash', slashSong);
 
         await callBack();
     }
@@ -260,6 +286,7 @@ class FortuneWheelService {
             if(block.active && this.ball.collide(block)){
                 this.ball.bumpBlock(block)
                 this.increaseScore()
+                this.playSong('bump')
             }
         })
     }
@@ -267,6 +294,7 @@ class FortuneWheelService {
     collidePlatform = () => {
         if(this.ball.collide(this.platform)){
             this.ball.bumpPlatform(this.platform);
+            this.playSong('slash')
         }
     }
 
@@ -307,9 +335,7 @@ class FortuneWheelService {
         this.init(canvasId);
         this.preload(() => {
             this.createBlocks();
-            window.addEventListener('load', () => {
-                this.run();
-            });
+            this.run();
         });
     }
 
