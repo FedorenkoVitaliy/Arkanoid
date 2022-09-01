@@ -43,7 +43,7 @@ class Ball {
         );
     }
 
-    collideWorldBounds = (stopGame) => {
+    collideWorldBounds = (gameOver) => {
         const nextX = this.x + this.dx;
         const nextY = this.y + this.dy;
 
@@ -77,7 +77,7 @@ class Ball {
         }
 
         if (ballPosition.bottom === worldPosition.bottom){
-            stopGame();
+            gameOver();
         }
     }
 
@@ -266,7 +266,7 @@ class FortuneWheelService {
         this.ball.move();
         this.collideBlocks();
         this.collidePlatform();
-        this.ball.collideWorldBounds(this.stop);
+        this.ball.collideWorldBounds(this.gameOver);
         this.platform.collideWorldBounds();
     }
 
@@ -304,7 +304,7 @@ class FortuneWheelService {
         });
     }
 
-    stop = () => {
+    gameOver = () => {
         this.inProgress = false;
         alert('Game over');
         window.location.reload();
