@@ -56,15 +56,22 @@ class Ball {
         const worldPosition = {
             left: 0,
             top: 0,
-            right: 360,
-            bottom: 640,
+            right: 640,
+            bottom: 360,
         }
 
-        if (ballPosition.left < worldPosition.left || ballPosition.right > worldPosition.right){
+        if (ballPosition.left <= worldPosition.left){
+            this.x = worldPosition.left;
             this.dx *= -1;
         }
 
-        if (ballPosition.top < worldPosition.top || ballPosition.bottom > worldPosition.bottom){
+        if(ballPosition.right >= worldPosition.right){
+            this.x = worldPosition.right - this.width;
+            this.dx *= -1;
+        }
+
+        if (ballPosition.top < worldPosition.top){
+            this.y = worldPosition.top;
             this.dy *= -1;
         }
     }
@@ -76,6 +83,9 @@ class Ball {
     }
 
     bumpPlatform = (platform) => {
+        if(platform.dx){
+            this.x += platform.dx;
+        }
         if(this.dy > 0) {
             let touchX = this.x + this.width / 2;
             this.dy = -this.velocity;
@@ -126,6 +136,26 @@ class Platform {
         let result = 2 * offset / this.width;
 
         return result - 1;
+    }
+
+    collideWorldBounds = () => {
+        const nextX = this.x + this.dx;
+
+        const platformPosition = {
+            left: nextX,
+            right: nextX + this.width,
+        }
+
+        const worldPosition = {
+            left: 0,
+            top: 0,
+            right: 640,
+            bottom: 360,
+        }
+
+        if (platformPosition.left < worldPosition.left || platformPosition.right > worldPosition.right){
+            this.dx = 0;
+        }
     }
 
     move = () => {
@@ -242,6 +272,7 @@ class FortuneWheelService {
         this.collideBlocks();
         this.collidePlatform();
         this.ball.collideWorldBounds();
+        this.platform.collideWorldBounds();
     }
 
     run = () => {
