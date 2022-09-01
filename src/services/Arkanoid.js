@@ -30,6 +30,7 @@ class Ball {
         this.dx = randomNumber(-this.velocity, this.velocity);
     }
 
+
     collide = (element) => {
         let nextX = this.x + this.dx;
         let nextY = this.y + this.dy;
@@ -42,7 +43,7 @@ class Ball {
         );
     }
 
-    collideWorldBounds = () => {
+    collideWorldBounds = (stopGame) => {
         const nextX = this.x + this.dx;
         const nextY = this.y + this.dy;
 
@@ -73,6 +74,10 @@ class Ball {
         if (ballPosition.top < worldPosition.top){
             this.y = worldPosition.top;
             this.dy *= -1;
+        }
+
+        if (ballPosition.bottom === worldPosition.bottom){
+            stopGame();
         }
     }
 
@@ -185,15 +190,13 @@ class FortuneWheelService {
         this.height = 360;
         this.ball = new Ball();
         this.platform = new Platform(this.ball);
+        this.inProgress = false
     }
 
     setEvents = () => {
         window.addEventListener("keydown", (e) => {
             if(e.keyCode === KEYS.SPACE){
                 this.platform.fire();
-            }
-            if(e.keyCode === KEYS.ESC){
-                this.reset();
             }
             else if(e.keyCode === KEYS.LEFT || e.keyCode === KEYS.RIGHT){
                 this.platform.start(e.keyCode);
@@ -205,14 +208,6 @@ class FortuneWheelService {
                 this.platform.stop();
             }
         })
-    }
-
-    reset = () => {
-        this.ball.dy = 0;
-        this.ball.y = 280;
-        this.ball.x = 320;
-        this.platform.dx = 0;
-        this.platform.x = 280;
     }
 
     init = (canvasId) => {
@@ -271,16 +266,18 @@ class FortuneWheelService {
         this.ball.move();
         this.collideBlocks();
         this.collidePlatform();
-        this.ball.collideWorldBounds();
+        this.ball.collideWorldBounds(this.stop);
         this.platform.collideWorldBounds();
     }
 
     run = () => {
-        window.requestAnimationFrame(() => {
-            this.update();
-            this.render();
-            this.run(); // I think not good solution
-        })
+       window.requestAnimationFrame(() => {
+           this.update();
+           this.render();
+           if(this.inProgress){
+            this.run();
+           }
+       })
     }
 
     render = () => {
@@ -297,6 +294,7 @@ class FortuneWheelService {
     }
 
     start = (canvasId) => {
+        this.inProgress = true;
         this.init(canvasId);
         this.preload(() => {
             this.createBlocks();
@@ -305,6 +303,13 @@ class FortuneWheelService {
             });
         });
     }
+
+    stop = () => {
+        this.inProgress = false;
+        alert('Game over');
+        window.location.reload();
+    }
+
 }
 
 const service = new FortuneWheelService();
