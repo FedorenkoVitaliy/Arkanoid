@@ -218,7 +218,13 @@ class FortuneWheelService {
 
     init = (canvasId) => {
         this.ctx = document.getElementById(canvasId).getContext('2d');
+        this.setTextStyle();
         this.setEvents();
+    }
+
+    setTextStyle = () => {
+        this.ctx.font = '20px Arial';
+        this.ctx.fillStyle = '#FFFFFF';
     }
 
     imageLoader = (name, img) => {
@@ -312,7 +318,7 @@ class FortuneWheelService {
            this.update();
            this.render();
            if(this.inProgress){
-            this.run();
+               this.run();
            }
        })
     }
@@ -328,6 +334,8 @@ class FortuneWheelService {
                 this.ctx.drawImage(this.sprite.block, block.x, block.y);
             }
         })
+
+        this.ctx.fillText(`Score: ${this.score}`, 15, 340);
     }
 
     start = (canvasId) => {
