@@ -30,7 +30,6 @@ class Ball {
         this.dx = randomNumber(-this.velocity, this.velocity);
     }
 
-
     collide = (element) => {
         let nextX = this.x + this.dx;
         let nextY = this.y + this.dy;
@@ -186,6 +185,7 @@ class FortuneWheelService {
         this.blocks = [];
         this.rows = 4;
         this.cols = 8;
+        this.score = 0;
         this.width = 640;
         this.height = 360;
         this.ball = new Ball();
@@ -247,10 +247,19 @@ class FortuneWheelService {
         }
     }
 
+    increaseScore = () => {
+        this.score++;
+
+        if(this.score >= this.blocks.length){
+            this.end('Game win');
+        }
+    }
+
     collideBlocks = () => {
         this.blocks.forEach(block => {
             if(block.active && this.ball.collide(block)){
                 this.ball.bumpBlock(block)
+                this.increaseScore()
             }
         })
     }
@@ -266,7 +275,7 @@ class FortuneWheelService {
         this.ball.move();
         this.collideBlocks();
         this.collidePlatform();
-        this.ball.collideWorldBounds(this.gameOver);
+        this.ball.collideWorldBounds(() => this.end('Game over'));
         this.platform.collideWorldBounds();
     }
 
@@ -304,9 +313,9 @@ class FortuneWheelService {
         });
     }
 
-    gameOver = () => {
+    end = (message) => {
         this.inProgress = false;
-        alert('Game over');
+        alert(message);
         window.location.reload();
     }
 
